@@ -80,13 +80,18 @@ router.put("/:id", [auth], async (req, res) => {
 // Delete a movie
 router.delete("/:id", [auth, admin], async (req, res) => {
   try {
-    const movie = await Movie.findByIdAndRemove(req.params.id);
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).send("Invalid movie ID.");
+    }
+
+    const movie = await Movie.findByIdAndDelete(req.params.id);
 
     if (!movie)
       return res.status(404).send("The movie with the given ID was not found.");
 
     res.send(movie);
   } catch (ex) {
+    console.error("Something failed during movie deletion:", ex); // Logging the error for better debugging
     res.status(500).send("Something failed during movie deletion.");
   }
 });
